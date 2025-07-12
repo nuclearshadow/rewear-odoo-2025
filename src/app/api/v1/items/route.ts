@@ -1,6 +1,7 @@
 // app/api/v1/items/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { getUserFromRequest } from '@/lib/auth'
 
 export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
@@ -19,18 +20,27 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+    const user = await getUserFromRequest(req)!
+    if (!user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await req.json()
-
-    // TODO: validate auth, get userId from token
-    // example: const { data: { user } } = await supabase.auth.getUser(access_token)
-
     const { title, description, category, type, size, condition, tags, images } = body
 
     const { data, error } = await supabaseAdmin
         .from('items')
         .insert([{
-            title, description, category, type, size, condition, tags, images,
-            status: 'available', user_id: 'some-user-id' // replace with real user id!
+            title,
+            description,
+            category,
+            type,
+            size,
+            condition,
+            tags,
+            images,
+            status: 'available',
+            user_id: user.id
         }])
         .select('*')
         .single()
