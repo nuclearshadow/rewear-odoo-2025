@@ -1,4 +1,5 @@
 // src/app/layout.tsx
+
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
@@ -21,6 +22,6 @@ export default function RootLayout({
           <main className="pt-20">{children}</main>
         </AuthProvider>
       </body>
-    </html>
+    </html> // <-- The missing closing tag
   );
 }

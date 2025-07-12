@@ -5,7 +5,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-// --- ADD 'ShieldCheck' icon for the admin button ---
 import { LayoutDashboard, LogOut, PlusSquare, ShieldCheck } from "lucide-react";
 
 export default function TopNavbar() {
@@ -81,7 +80,6 @@ export default function TopNavbar() {
                       {user.username}
                     </p>
                   </div>
-
                   <nav className="flex flex-col gap-1">
                     {/* --- THIS IS THE NEW LOGIC --- */}
                     {/* If the user is an admin, show the special admin button */}
@@ -115,7 +113,6 @@ export default function TopNavbar() {
                       Item
                     </Link>
                   </nav>
-
                   <div className="border-t my-2 border-black/10"></div>
 
                   <button
