@@ -5,65 +5,63 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import ItemCard, { Item } from "@/components/common/ItemCard"; // We will reuse our ItemCard!
+import ItemCard, { Item } from "@/components/common/ItemCard";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-// A simple spinner component
+import MyItemsPage from "@/components/ui/MyItemsComponent";
+
 const Spinner = () => (
   <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
 );
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isLoading: isAuthLoading } = useAuth(); // Get user and loading state from context
-
-  const [dashboardData, setDashboardData] = useState<{
-    myListings: Item[];
-    myPurchases: Item[];
-  } | null>(null);
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const [myItems, setMyItems] = useState<Item[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
-   const handleLogout = async () => {
-    try {
-      const res = await fetch('/api/v1/auth/logout', {
-        method: 'POST',
-        credentials: 'include', // send cookies
-      });
-
-      if (res.ok) {
-        router.push('/login'); // redirect after logout
-      } else {
-        console.error('Logout failed');
-      }
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-  // --- Authentication and Data Fetching Logic ---
   useEffect(() => {
-    // This effect handles protecting the route
     if (!isAuthLoading && !user) {
       router.push("/login");
     }
 
-    // This effect fetches the data once we know a user is logged in
     if (user) {
-      const fetchDashboardData = async () => {
+      const fetchMyItems = async () => {
         try {
-          const response = await fetch("/api/v1/dashboard");
-          if (!response.ok) throw new Error("Failed to fetch dashboard data");
-          const data = await response.json();
-          setDashboardData(data);
+          const res = await fetch("/api/v1/items/mine", {
+            method: "GET",
+            credentials: "include",
+          });
+          if (!res.ok) throw new Error("Failed to fetch items");
+          const data = await res.json();
+          setMyItems(data);
         } catch (error) {
-          console.error(error);
+          console.error("Error fetching items:", error);
         } finally {
           setIsLoadingData(false);
         }
       };
-      fetchDashboardData();
+
+      fetchMyItems();
     }
   }, [user, isAuthLoading, router]);
 
-  // --- Render States ---
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/v1/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        router.push("/login");
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   if (isAuthLoading || isLoadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -72,83 +70,56 @@ export default function DashboardPage() {
     );
   }
 
-  // This state will be hit if the redirect hasn't happened yet, but there's no user
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <ProtectedRoute>
-    <div className="bg-gray-100 min-h-screen">
-      <button
-      onClick={handleLogout}
-      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-    >
-      Logout
-    </button>
-      <div className="container mx-auto p-4 md:p-8">
-        {/* Profile Section */}
-        <section className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <div className="flex items-center space-x-4">
-            <div className="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center text-white text-4xl font-bold">
-              {user.username.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold">{user.username}</h1>
-              <p className="text-gray-600">{user.email}</p>
-              <p className="text-lg font-semibold text-blue-600 mt-1">
-                {user.points_balance || 0} Points
-              </p>
-            </div>
-          </div>
-        </section>
+      <div className="bg-gray-100 min-h-screen">
+        <div className="flex justify-end p-4">
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          >
+            Logout
+          </button>
+        </div>
 
-        {/* My Listings Section */}
-        <section className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">My Listings</h2>
-          {dashboardData?.myListings && dashboardData.myListings.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-              {dashboardData.myListings.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
+        <div className="container mx-auto p-4 md:p-8">
+          {/* Profile Section */}
+          <section className="bg-white p-6 rounded-lg shadow-md mb-8">
+            <div className="flex items-center space-x-4">
+              <div className="w-24 h-24 bg-blue-500 rounded-full flex items-center justify-center text-white text-4xl font-bold">
+                {user.username.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold">{user.username}</h1>
+                <p className="text-gray-600">{user.email}</p>
+                <p className="text-lg font-semibold text-blue-600 mt-1">
+                  {user.points_balance || 0} Points
+                </p>
+              </div>
             </div>
-          ) : (
-            <div className="bg-white p-6 rounded-lg text-center text-gray-500">
-              <p>You haven't listed any items yet.</p>
-              <Link
-                href="/items/add"
-                className="inline-block mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-              >
-                List an Item
-              </Link>
-            </div>
-          )}
-        </section>
+          </section>
 
-        {/* My Purchases Section */}
-        <section>
-          <h2 className="text-2xl font-bold mb-4">My Purchases</h2>
-          {dashboardData?.myPurchases &&
-          dashboardData.myPurchases.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-              {dashboardData.myPurchases.map((item) => (
-                <ItemCard key={item.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <div className="bg-white p-6 rounded-lg text-center text-gray-500">
-              <p>You haven't acquired any items yet.</p>
-              <Link
-                href="/browse"
-                className="inline-block mt-2 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800"
+          {/* My Listings Section */}
+          <section className="mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">My Listings</h2>
+              <button
+                onClick={() => router.push("/add-item")}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
               >
-                Browse Items
-              </Link>
+                Add Item
+              </button>
             </div>
-          )}
-        </section>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <MyItemsPage />
+            </div>
+          </section>
+
+          {/* My Purchases Section (Optional for future) */}
+        </div>
       </div>
-    </div>
     </ProtectedRoute>
   );
 }

@@ -14,7 +14,7 @@ type ImageUploaderProps = {
  * @param label - Optional label above input
  * @param onChange - Callback that returns selected File[] to parent
  * @param maxImages - Max number of allowed images (default: 5)
- * when uploading more than max images it doesnt give us error need to handle that
+ * Shows error when trying to upload more than maxImages.
  */
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   label,
@@ -23,29 +23,43 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 }) => {
   const [previews, setPreviews] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = (selectedFiles: FileList | null) => {
     if (!selectedFiles) return;
 
-    const fileArray = Array.from(selectedFiles);
-    const totalFiles = [...files, ...fileArray].slice(0, maxImages);
-    setFiles(totalFiles);
-    onChange(totalFiles);
+    const newFiles = Array.from(selectedFiles);
+    const totalFilesCount = files.length + newFiles.length;
 
-    // Generate preview URLs
-    const previewUrls = totalFiles.map((file) => URL.createObjectURL(file));
-    setPreviews(previewUrls);
+    if (totalFilesCount > maxImages) {
+      setError(`You can upload up to ${maxImages} images only.`);
+      return;
+    }
+
+    const updatedFiles = [...files, ...newFiles];
+    setFiles(updatedFiles);
+    onChange(updatedFiles);
+    setError(null); // clear error
+
+    // Update previews
+    const updatedPreviews = updatedFiles.map((file) =>
+      URL.createObjectURL(file)
+    );
+    setPreviews(updatedPreviews);
   };
 
   const removeImage = (index: number) => {
-    const newFiles = [...files];
-    const newPreviews = [...previews];
-    newFiles.splice(index, 1);
-    newPreviews.splice(index, 1);
-    setFiles(newFiles);
-    setPreviews(newPreviews);
-    onChange(newFiles);
+    const updatedFiles = [...files];
+    const updatedPreviews = [...previews];
+
+    updatedFiles.splice(index, 1);
+    updatedPreviews.splice(index, 1);
+
+    setFiles(updatedFiles);
+    setPreviews(updatedPreviews);
+    onChange(updatedFiles);
+    setError(null); // remove error if any
   };
 
   return (
@@ -54,11 +68,18 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
       <div className="flex flex-wrap gap-4">
         {previews.map((src, idx) => (
-          <div key={idx} className="relative w-24 h-24 rounded overflow-hidden border">
-            <img src={src} alt={`preview-${idx}`} className="object-cover w-full h-full" />
+          <div
+            key={idx}
+            className="relative w-24 h-24 rounded overflow-hidden border"
+          >
+            <img
+              src={src}
+              alt={`preview-${idx}`}
+              className="object-cover w-full h-full"
+            />
             <button
               onClick={() => removeImage(idx)}
-              className="absolute top-0 right-0 bg-black/50 text-white px-1 text-xs"
+              className="absolute top-0 right-0 bg-black/60 text-white px-1 text-xs"
             >
               ×
             </button>
@@ -67,6 +88,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
         {files.length < maxImages && (
           <button
+            type="button"
             onClick={() => inputRef.current?.click()}
             className="w-24 h-24 border border-dashed rounded flex items-center justify-center text-sm text-gray-600 hover:border-gray-400"
           >
@@ -74,6 +96,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           </button>
         )}
       </div>
+
+      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
 
       <input
         ref={inputRef}
