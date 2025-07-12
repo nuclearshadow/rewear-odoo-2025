@@ -36,7 +36,7 @@ export default function LoginPage() {
       const userData = { ...data.user, ...data.profile };
       setUser(userData);
 
-      router.push("/dashboard");
+      router.push("/");
     } catch (err: any) {
       setError(err.message);
     } finally {
