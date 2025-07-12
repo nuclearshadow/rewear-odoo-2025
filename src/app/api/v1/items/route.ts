@@ -40,8 +40,19 @@ export async function GET(req: NextRequest) {
 
     let query = supabaseAdmin
         .from('items')
-        .select('*')
-        .eq('status', 'available')
+        .select(`
+            id,
+            title,
+            price,
+            status,
+            created_at,
+            profiles (
+            id,
+            username,
+            avatar_url
+            )
+        `)
+        .eq('status', 'available');
 
     if (user) {
         query = query.neq('user_id', user.id)

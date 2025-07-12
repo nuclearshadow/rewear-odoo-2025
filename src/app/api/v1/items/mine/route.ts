@@ -12,7 +12,18 @@ export async function GET(req: NextRequest) {
 
     const { data, error } = await supabaseAdmin
         .from('items')
-        .select('*')
+        .select(`
+            id,
+            title,
+            price,
+            status,
+            created_at,
+            profiles (
+            id,
+            username,
+            avatar_url
+            )
+        `)
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
