@@ -14,6 +14,7 @@ type ImageUploaderProps = {
  * @param label - Optional label above input
  * @param onChange - Callback that returns selected File[] to parent
  * @param maxImages - Max number of allowed images (default: 5)
+ * when uploading more than max images it doesnt give us error need to handle that
  */
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   label,

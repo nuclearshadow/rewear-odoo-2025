@@ -7,7 +7,7 @@ interface ProfileMenuButtonProps {
   imageUrl?: string;
 }
 
-export const ProfileMenuButton: React.FC<ProfileMenuButtonProps> = ({ name, imageUrl }) => {
+const ProfileMenuButton: React.FC<ProfileMenuButtonProps> = ({ name, imageUrl }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -71,3 +71,5 @@ export const ProfileMenuButton: React.FC<ProfileMenuButtonProps> = ({ name, imag
     </div>
   );
 };
+
+export default ProfileMenuButton
