@@ -3,7 +3,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
-import TopNavbar from "@/components/layout/TopNavbar"; // Import the new navbar
+import TopNavbar from "@/components/layout/TopNavbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,9 +16,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.className} bg-gray-100`}>
         <AuthProvider>
-          <TopNavbar /> {/* The new top-floating navbar */}
-          {/* Main content must have top padding to not be hidden underneath the fixed navbar */}
-          <main className="pt-24">{children}</main>
+          <TopNavbar />
+
+          {/* We set a reasonable default padding for all standard pages. */}
+          <main className="pt-20">{children}</main>
         </AuthProvider>
       </body>
     </html> // <-- The missing closing tag
