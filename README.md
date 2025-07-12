@@ -9,10 +9,10 @@ fashion and reduce textile waste by encouraging users to reuse wearable garments
 discarding them.
 
 ## Team
-Dhurvil Patel - Dhruvil-Patel22
-Nikunj Tank - citric69
-Om Maniar - ommaniar
-Keval Bhavsar - nuclearshadow
+- Dhurvil Patel - Dhruvil-Patel22
+- Nikunj Tank - citric69
+- Om Maniar - ommaniar
+- Keval Bhavsar - nuclearshadow
 
 ## Getting Started
 
