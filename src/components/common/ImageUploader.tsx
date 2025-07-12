@@ -71,6 +71,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
         {previews.length < maxImages && (
           <button
+            type="button"
             onClick={() => inputRef.current?.click()}
             className="w-24 h-24 border border-dashed rounded flex items-center justify-center text-sm text-gray-600 hover:border-gray-400"
           >
@@ -78,6 +79,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           </button>
         )}
       </div>
+
+      {error && <p className="text-sm text-red-500 mt-2">{error}</p>}
 
       <input
         ref={inputRef}

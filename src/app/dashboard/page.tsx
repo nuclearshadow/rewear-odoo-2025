@@ -5,8 +5,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
-import ItemCard, { Item } from "@/components/common/ItemCard"; // We will reuse our ItemCard!
+import ItemCard, { Item } from "@/components/common/ItemCard";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import MyItemsPage from "@/components/ui/MyItemsComponent";
 import ImageUploader from "@/components/common/ImageUploader";
 // A simple spinner component
 const Spinner = () => (
@@ -15,37 +16,32 @@ const Spinner = () => (
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { user, isLoading: isAuthLoading } = useAuth(); // Get user and loading state from context
-
-  const [dashboardData, setDashboardData] = useState<{
-    myListings: Item[];
-    myPurchases: Item[];
-  } | null>({ myListings: [], myPurchases: [] });  
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const [myItems, setMyItems] = useState<Item[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
-  // --- Authentication and Data Fetching Logic ---
   useEffect(() => {
     if (!isAuthLoading && !user) {
       router.push("/login");
     }
-  
     if (user) {
-      const fetchMyListings = async () => {
+      const fetchMyItems = async () => {
         try {
-          const res = await fetch("/api/v1/items/mine");
-          if (!res.ok) throw new Error("Failed to fetch listings");
-          const items: Item[] = await res.json();
-          setDashboardData({
-            myListings: items,
-            myPurchases: [] // keep empty for now
+          const res = await fetch("/api/v1/items/mine", {
+            method: "GET",
+            credentials: "include",
           });
-        } catch (err) {
-          console.error(err);
+          if (!res.ok) throw new Error("Failed to fetch items");
+          const data = await res.json();
+          setMyItems(data);
+        } catch (error) {
+          console.error("Error fetching items:", error);
         } finally {
           setIsLoadingData(false);
         }
       };
-      fetchMyListings();
+
+      fetchMyItems();
     }
   }, [user, isAuthLoading, router]);
   
@@ -85,7 +81,23 @@ export default function DashboardPage() {
     }
   };
 
-  // --- Render States ---
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/v1/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        router.push("/login");
+      } else {
+        console.error("Logout failed");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   if (isAuthLoading || isLoadingData) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -94,10 +106,7 @@ export default function DashboardPage() {
     );
   }
 
-  // This state will be hit if the redirect hasn't happened yet, but there's no user
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
 
   return (
     <ProtectedRoute>
@@ -134,40 +143,25 @@ export default function DashboardPage() {
             </div>
           </section>
 
-
           {/* My Listings Section */}
           <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">My Listings</h2>
-            {dashboardData?.myListings && dashboardData.myListings.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {dashboardData.myListings.map((item) => (
-                  <ItemCard key={item.id} item={item} />
-                ))}
-              </div>
-            ) : (
-              <div className="bg-white p-6 rounded-lg text-center text-gray-500">
-                <p>You haven't listed any items yet.</p>
-                <Link
-                  href="/items/add"
-                  className="inline-block mt-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                >
-                  List an Item
-                </Link>
-              </div>
-            )}
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold">My Listings</h2>
+              <button
+                onClick={() => router.push("/add-item")}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+              >
+                Add Item
+              </button>
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow">
+              <MyItemsPage />
+            </div>
           </section>
 
-          {/* My Purchases Section */}
+          {/* My Purchases Section (Optional for future) */}
           <section>
             <h2 className="text-2xl font-bold mb-4">My Purchases</h2>
-            {dashboardData?.myPurchases &&
-              dashboardData.myPurchases.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-                {dashboardData.myPurchases.map((item) => (
-                  <ItemCard key={item.id} item={item} />
-                ))}
-              </div>
-            ) : (
               <div className="bg-white p-6 rounded-lg text-center text-gray-500">
                 <p>You haven't acquired any items yet.</p>
                 <Link
@@ -177,7 +171,6 @@ export default function DashboardPage() {
                   Browse Items
                 </Link>
               </div>
-            )}
           </section>
         </div>
       </div>
