@@ -10,7 +10,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { setUser } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const [emailOrUsername, setEmailOrUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,7 +24,7 @@ export default function LoginPage() {
       const response = await fetch("/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ emailOrUsername, password }),
       });
 
       const data = await response.json();
@@ -63,19 +63,19 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-6">
           <div>
             <label
-              htmlFor="email"
+              htmlFor="emailOrUsername"
               className="block text-sm font-medium text-gray-700"
             >
-              Email Address
+              Email or Username
             </label>
             <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
+              id="emailOrUsername"
+              name="emailOrUsername"
+              type="emailOrUsername"
+              autoComplete="emailOrUsername"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={emailOrUsername}
+              onChange={(e) => setEmailOrUsername(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             />
           </div>

@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 
 export async function POST(req: NextRequest) {
     const body = await req.json()
-    const { email, password, username } = body
+    const { email, password, username, display_name } = body
 
     if (!email || !password || !username) {
         return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
@@ -29,7 +29,9 @@ export async function POST(req: NextRequest) {
         .from('profiles')
         .insert({
             id: userId,
+            email,
             username,
+            display_name: display_name ?? '',
             avatar_url: null,
             points: 0,
             role: 'user'
