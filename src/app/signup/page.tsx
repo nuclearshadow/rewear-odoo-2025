@@ -30,7 +30,7 @@ export default function SignUpPage() {
 
     try {
       // --- CHANGE 3: Add display_name to the request body ---
-      const response = await fetch("/api/v1/auth/signup", {
+      const response = await fetch("/api/v1/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
