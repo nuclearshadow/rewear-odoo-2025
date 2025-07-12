@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import ItemCard, { Item } from "@/components/common/ItemCard"; // We will reuse our ItemCard!
-
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 // A simple spinner component
 const Spinner = () => (
   <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
@@ -22,6 +22,22 @@ export default function DashboardPage() {
   } | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
 
+   const handleLogout = async () => {
+    try {
+      const res = await fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        credentials: 'include', // send cookies
+      });
+
+      if (res.ok) {
+        router.push('/login'); // redirect after logout
+      } else {
+        console.error('Logout failed');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
   // --- Authentication and Data Fetching Logic ---
   useEffect(() => {
     // This effect handles protecting the route
@@ -62,7 +78,14 @@ export default function DashboardPage() {
   }
 
   return (
+    <ProtectedRoute>
     <div className="bg-gray-100 min-h-screen">
+      <button
+      onClick={handleLogout}
+      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+    >
+      Logout
+    </button>
       <div className="container mx-auto p-4 md:p-8">
         {/* Profile Section */}
         <section className="bg-white p-6 rounded-lg shadow-md mb-8">
@@ -126,5 +149,6 @@ export default function DashboardPage() {
         </section>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
