@@ -2,8 +2,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import StatusBadge from "@/components/ui/StatusBadge"; // Make sure this component exists
-import { useToast } from "@/hooks/useToast"; // Import the toast hook
+// import StatusBadge from "@/components/ui/StatusBadge"; // Make sure this component exists
+// import { useToast } from "@/hooks/useToast"; // Import the toast hook
 
 // Define the shape of our listing data from the API
 type Listing = {
@@ -19,7 +19,7 @@ type Listing = {
 export default function ManageListingsPage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { addToast } = useToast();
+  // const { addToast } = useToast();
 
   const fetchListings = async () => {
     setIsLoading(true);
@@ -29,7 +29,7 @@ export default function ManageListingsPage() {
       if (!res.ok) throw new Error(data.error);
       setListings(data);
     } catch (err) {
-      addToast("Failed to load listings", "error");
+      // addToast("Failed to load listings", "error");
     } finally {
       setIsLoading(false);
     }
@@ -58,12 +58,12 @@ export default function ManageListingsPage() {
           item.id === id ? { ...item, status: updatedItem.status } : item
         )
       );
-      addToast(
-        `Item ${status === "available" ? "approved" : "rejected"}.`,
-        "success"
-      );
+      // addToast(
+      //   `Item ${status === "available" ? "approved" : "rejected"}.`,
+      //   "success"
+      // );
     } catch (err: any) {
-      addToast(err.message, "error");
+      // addToast(err.message, "error");
     }
   };
 
@@ -104,7 +104,7 @@ export default function ManageListingsPage() {
                     {item.profiles?.username || "N/A"}
                   </td>
                   <td className="px-6 py-4">
-                    <StatusBadge status={item.status} />
+                    {/* <StatusBadge status={item.status} /> */}
                   </td>
                   <td className="px-6 py-4 text-right space-x-2">
                     {item.status === "pending_approval" && (
