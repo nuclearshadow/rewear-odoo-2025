@@ -15,9 +15,12 @@ discarding them.
 - Keval Bhavsar - nuclearshadow
 
 ## Getting Started
+Initialize:
+```bash
+npm install
+```
 
-First, run the development server:
-
+Run the development server:
 ```bash
 npm run dev
 ```
