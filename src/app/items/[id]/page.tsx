@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import ListingGallery from "@/components/common/ListingGallery";
 import { useAuth } from "@/context/AuthContext";
-import Header from "@/components/layout/Header";
+
 import Footer from "@/components/layout/Footer";
 
 // Define the detailed shape of our item object based on the new API response
@@ -99,7 +99,6 @@ export default function ItemDetailPage({ params }: { params: { id: string } }) {
   // The main component render
   return (
     <>
-      <Header />
       <main className="container mx-auto max-w-6xl p-4 md:p-8 my-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
           {/* Left Column: Image Gallery */}
