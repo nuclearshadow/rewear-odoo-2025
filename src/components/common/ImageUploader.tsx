@@ -1,63 +1,67 @@
 "use client";
 
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 
 type ImageUploaderProps = {
   label?: string;
-  onChange: (files: File[]) => void;
+  onChange: (files: File[] | null) => void;
   maxImages?: number;
+  initialImages?: string[]; // now supports multiple initial images
 };
 
-/**
- * ImageUploader component
- *
- * @param label - Optional label above input
- * @param onChange - Callback that returns selected File[] to parent
- * @param maxImages - Max number of allowed images (default: 5)
- * when uploading more than max images it doesnt give us error need to handle that
- */
 const ImageUploader: React.FC<ImageUploaderProps> = ({
   label,
   onChange,
-  maxImages = 5,
+  maxImages = 1,
+  initialImages = [],
 }) => {
-  const [previews, setPreviews] = useState<string[]>([]);
   const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>(initialImages);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setPreviews(initialImages);
+  }, [initialImages]);
+
   const handleFiles = (selectedFiles: FileList | null) => {
-    if (!selectedFiles) return;
+    if (!selectedFiles || selectedFiles.length === 0) return;
 
-    const fileArray = Array.from(selectedFiles);
-    const totalFiles = [...files, ...fileArray].slice(0, maxImages);
-    setFiles(totalFiles);
-    onChange(totalFiles);
+    let newFiles = Array.from(selectedFiles);
+    if (files.length + newFiles.length > maxImages) {
+      setError(`You can only upload up to ${maxImages} image${maxImages > 1 ? "s" : ""}`);
+      return;
+    }
 
-    // Generate preview URLs
-    const previewUrls = totalFiles.map((file) => URL.createObjectURL(file));
-    setPreviews(previewUrls);
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+
+    const updatedFiles = [...files, ...newFiles];
+    const updatedPreviews = [...previews, ...newPreviews];
+
+    setFiles(updatedFiles);
+    setPreviews(updatedPreviews);
+    onChange(updatedFiles);
+    setError(null);
   };
 
   const removeImage = (index: number) => {
-    const newFiles = [...files];
-    const newPreviews = [...previews];
-    newFiles.splice(index, 1);
-    newPreviews.splice(index, 1);
-    setFiles(newFiles);
-    setPreviews(newPreviews);
-    onChange(newFiles);
+    const updatedFiles = files.filter((_, i) => i !== index);
+    const updatedPreviews = previews.filter((_, i) => i !== index);
+    setFiles(updatedFiles);
+    setPreviews(updatedPreviews);
+    onChange(updatedFiles.length > 0 ? updatedFiles : null);
   };
 
   return (
     <div>
       {label && <label className="block mb-2 font-medium">{label}</label>}
 
-      <div className="flex flex-wrap gap-4">
-        {previews.map((src, idx) => (
-          <div key={idx} className="relative w-24 h-24 rounded overflow-hidden border">
-            <img src={src} alt={`preview-${idx}`} className="object-cover w-full h-full" />
+      <div className="flex gap-2 flex-wrap">
+        {previews.map((preview, index) => (
+          <div key={index} className="relative w-24 h-24 rounded overflow-hidden border">
+            <img src={preview} alt={`preview-${index}`} className="object-cover w-full h-full" />
             <button
-              onClick={() => removeImage(idx)}
+              onClick={() => removeImage(index)}
               className="absolute top-0 right-0 bg-black/50 text-white px-1 text-xs"
             >
               ×
@@ -65,7 +69,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           </div>
         ))}
 
-        {files.length < maxImages && (
+        {previews.length < maxImages && (
           <button
             onClick={() => inputRef.current?.click()}
             className="w-24 h-24 border border-dashed rounded flex items-center justify-center text-sm text-gray-600 hover:border-gray-400"
@@ -79,10 +83,12 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
         ref={inputRef}
         type="file"
         accept="image/*"
-        multiple
+        multiple={maxImages > 1}
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
+
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
   );
 };
