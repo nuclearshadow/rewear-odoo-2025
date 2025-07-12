@@ -5,6 +5,8 @@ import { useState } from "react";
 import Link from "next/link";
 
 export default function SignUpPage() {
+  // --- CHANGE 1: Add state for the new field ---
+  const [displayName, setDisplayName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,7 +21,6 @@ export default function SignUpPage() {
     setError(null);
     setMessage(null);
 
-    // Basic frontend validation
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
@@ -28,10 +29,16 @@ export default function SignUpPage() {
     setIsLoading(true);
 
     try {
+      // --- CHANGE 3: Add display_name to the request body ---
       const response = await fetch("/api/v1/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, username }),
+        body: JSON.stringify({
+          email,
+          password,
+          username,
+          display_name: displayName,
+        }),
       });
 
       const data = await response.json();
@@ -40,7 +47,6 @@ export default function SignUpPage() {
         throw new Error(data.error || "Failed to sign up.");
       }
 
-      // Show success message from the API
       setMessage(data.message);
     } catch (err: any) {
       setError(err.message);
@@ -56,17 +62,36 @@ export default function SignUpPage() {
           Create Your ReWear Account
         </h2>
 
-        {/* This form is shown if there's no success message yet */}
         {!message && (
           <form onSubmit={handleSignUp} className="space-y-4">
             {error && <p className="text-red-500 text-sm">{error}</p>}
+
+            {/* --- CHANGE 2: Add the new input field JSX --- */}
+            <div>
+              <label
+                htmlFor="displayName"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Display Name (Public)
+              </label>
+              <input
+                id="displayName"
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+                placeholder="e.g. Jane Doe"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
+              />
+            </div>
+            {/* --- END OF NEW FIELD --- */}
 
             <div>
               <label
                 htmlFor="username"
                 className="block text-sm font-medium text-gray-700"
               >
-                Username
+                Username (Unique, for login)
               </label>
               <input
                 id="username"
@@ -74,6 +99,7 @@ export default function SignUpPage() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                placeholder="e.g. janedoe25"
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"
               />
             </div>
@@ -100,7 +126,7 @@ export default function SignUpPage() {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Password (min. 6 characters)
               </label>
               <input
                 id="password"
@@ -139,7 +165,6 @@ export default function SignUpPage() {
           </form>
         )}
 
-        {/* This is shown on success */}
         {message && (
           <div className="text-center">
             <h3 className="text-lg font-medium text-green-700">Success!</h3>

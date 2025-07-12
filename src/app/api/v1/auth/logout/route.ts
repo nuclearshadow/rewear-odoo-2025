@@ -1,11 +1,27 @@
+// src/app/api/v1/auth/logout/route.ts
+
 import { NextResponse } from "next/server";
 
+// It's good practice for an action like logout to be a POST request
 export async function POST() {
-  const response = NextResponse.json({ message: "Logged out" });
-  response.cookies.set("access_token", "", {
-    httpOnly: true,
-    path: "/",
-    expires: new Date(0),
-  });
-  return response;
+  try {
+    // Create a response object
+    const response = NextResponse.json({
+      success: true,
+      message: "Logged out successfully.",
+    });
+
+    // Instruct the browser to clear the 'auth-token' cookie
+    response.cookies.set("auth-token", "", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 0, // Setting maxAge to 0 tells the browser to expire the cookie immediately
+    });
+
+    return response;
+  } catch (e: any) {
+    return NextResponse.json({ error: "Failed to logout" }, { status: 500 });
+  }
 }
