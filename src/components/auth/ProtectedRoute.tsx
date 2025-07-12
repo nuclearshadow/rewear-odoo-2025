@@ -1,44 +1,49 @@
-"use client";
+'use client';
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import Cookies from "js-cookie";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type ProtectedRouteProps = {
   children: React.ReactNode;
   redirectTo?: string;
-  tokenKey?: string; // cookie key, e.g. "user_token", "admin_token"
 };
 
-/**
- * ProtectedRoute
- *
- * A wrapper that checks for a token in cookies.
- * Redirects to login (or given path) if not present.
- *
- * @param children - protected content
- * @param redirectTo - fallback path if not authenticated
- * @param tokenKey - cookie key to check (default: "token")
- */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
-  redirectTo = "/login",
-  tokenKey = "token",
+  redirectTo = '/login',
 }) => {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
-  const token = Cookies.get(tokenKey);
+  const [isLoading, setIsLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    if (!token) {
-      router.replace(redirectTo);
-    }
-  }, [token, redirectTo, router]);
+    const checkAuth = async () => {
+      try {
+        const res = await fetch('/api/v1/auth/me', {
+          method: 'GET',
+          credentials: 'include', // IMPORTANT: send HTTP-only cookie
+        });
 
-  if (!isMounted || !token) return null;
+        if (res.ok) {
+          const data = await res.json();
+          setAuthenticated(true);
+        } else {
+          router.replace(redirectTo);
+        }
+      } catch (err) {
+        console.error('Auth check failed:', err);
+        router.replace(redirectTo);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  return <>{children}</>;
+    checkAuth();
+  }, [router, redirectTo]);
+
+  if (isLoading) return null;
+
+  return <>{authenticated ? children : null}</>;
 };
 
 export default ProtectedRoute;

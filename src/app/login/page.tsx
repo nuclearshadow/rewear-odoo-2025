@@ -1,10 +1,11 @@
 // src/app/login/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import Spinner from "@/components/common/Spinner"; // adjust path if needed
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +15,27 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+const [checkingAuth, setCheckingAuth] = useState(true);
+
+useEffect(() => {
+  const checkLoggedIn = async () => {
+    try {
+      const res = await fetch("/api/v1/auth/me", { credentials: "include" });
+      const data = await res.json();
+      console.log("ME response", data);
+      if (res.ok) {
+        router.replace("/dashboard");
+      }
+    } catch (err) {
+      console.error("Error during auth check", err);
+    } finally {
+      setCheckingAuth(false);
+    }
+  };
+
+  checkLoggedIn();
+}, []);
+
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,6 +65,13 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+if (checkingAuth) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Spinner />
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
