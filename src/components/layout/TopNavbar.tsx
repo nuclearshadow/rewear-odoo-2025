@@ -5,7 +5,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import { LayoutDashboard, LogOut, PlusSquare } from "lucide-react";
+// --- ADD 'ShieldCheck' icon for the admin button ---
+import { LayoutDashboard, LogOut, PlusSquare, ShieldCheck } from "lucide-react";
 
 export default function TopNavbar() {
   const router = useRouter();
@@ -24,17 +25,14 @@ export default function TopNavbar() {
     }
   };
 
-  // --- THIS IS OUR NEW CONSISTENT STYLE DEFINITION ---
-  // Note: The dropdown uses `rounded-2xl` while the main bar is `rounded-full` for a standard nested look.
-  const glassStyle =
-    "border border-black/10 shadow-lg bg-white/90 backdrop-blur-sm";
-
   return (
     <header className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4">
       <div
-        className={`w-full max-w-5xl flex items-center justify-between px-4 py-2 rounded-full ${glassStyle} transition-all duration-300 ease-in-out`}
+        className="w-full max-w-5xl flex items-center justify-between px-4 py-2
+                           rounded-full border border-black/10 shadow-lg
+                           bg-white/60 backdrop-blur-xl"
       >
-        {/* Left Side: Logo & Main Navigation */}
+        {/* ... Left Side and other sections remain exactly the same ... */}
         <div className="flex items-center gap-4">
           <Link
             href="/"
@@ -58,7 +56,6 @@ export default function TopNavbar() {
           </nav>
         </div>
 
-        {/* Right Side: Dynamic Auth Section */}
         <div className="flex items-center">
           {isLoading ? (
             <div className="h-10 w-24 bg-gray-200/80 rounded-full animate-pulse"></div>
@@ -77,16 +74,28 @@ export default function TopNavbar() {
               </button>
 
               {isMenuOpen && (
-                <div
-                  className={`absolute right-0 mt-3 w-56 p-2 rounded-2xl animate-fade-in-down ${glassStyle}`}
-                >
-                  <div className="px-2 py-2 border-b border-black/10">
+                <div className="absolute right-0 mt-3 w-56 p-2 rounded-2xl border border-black/10 shadow-xl bg-white backdrop-blur-xl animate-fade-in-down">
+                  <div className="px-2 py-2 border-b border-black/10 mb-2">
                     <p className="text-sm text-gray-600">Signed in as</p>
                     <p className="font-semibold text-gray-900 truncate">
                       {user.username}
                     </p>
                   </div>
-                  <nav className="flex flex-col gap-1 mt-2">
+
+                  <nav className="flex flex-col gap-1">
+                    {/* --- THIS IS THE NEW LOGIC --- */}
+                    {/* If the user is an admin, show the special admin button */}
+                    {user.role === "admin" && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2 text-sm text-red-700 bg-red-500/10 rounded-lg hover:bg-red-500/20 transition-colors font-semibold"
+                      >
+                        <ShieldCheck className="h-4 w-4" /> Admin Panel
+                      </Link>
+                    )}
+
+                    {/* Regular user dashboard link, visible to everyone (including admins) */}
                     <Link
                       href="/dashboard"
                       onClick={() => setIsMenuOpen(false)}
@@ -95,6 +104,8 @@ export default function TopNavbar() {
                       <LayoutDashboard className="h-4 w-4 text-gray-600" />{" "}
                       Dashboard
                     </Link>
+
+                    {/* List an Item link */}
                     <Link
                       href="/items/add"
                       onClick={() => setIsMenuOpen(false)}
@@ -104,18 +115,21 @@ export default function TopNavbar() {
                       Item
                     </Link>
                   </nav>
+
                   <div className="border-t my-2 border-black/10"></div>
+
                   <button
                     onClick={handleLogout}
                     className="flex items-center gap-3 w-full text-left px-3 py-2 text-sm text-red-700 rounded-lg hover:bg-red-500/10 transition-colors font-semibold"
                   >
-                    <LogOut className="h-4 w-4" /> Logout
+                    <LogOut className="h-4 w-4" />
+                    Logout
                   </button>
                 </div>
               )}
             </div>
           ) : (
-            // Logged-out state
+            // ... Logged-out state ...
             <div className="flex items-center gap-2">
               <Link
                 href="/login"
