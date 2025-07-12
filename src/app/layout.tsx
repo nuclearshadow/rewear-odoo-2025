@@ -1,8 +1,10 @@
 // src/app/layout.tsx
+
 import "./globals.css";
 import { Inter } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
-import FloatingNavbar from "@/components/layout/FloatingNavbar"; // <-- Import the new navbar
+import TopNavbar from "@/components/layout/TopNavbar"; // Import the new navbar
+
 const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
@@ -12,15 +14,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} bg-gray-50`}>
+      <body className={`${inter.className} bg-gray-100`}>
         <AuthProvider>
-          <FloatingNavbar />{" "}
-          {/* The new floating sidebar. It needs no wrappers. */}
-          <div>
-            <main>{children}</main>
-          </div>
+          <TopNavbar /> {/* The new top-floating navbar */}
+          {/* Main content must have top padding to not be hidden underneath the fixed navbar */}
+          <main className="pt-24">{children}</main>
         </AuthProvider>
       </body>
-    </html>
+    </html> // <-- The missing closing tag
   );
 }
