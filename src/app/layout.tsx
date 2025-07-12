@@ -1,11 +1,9 @@
 // src/app/layout.tsx
 import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext"; // 1. Import it
-
-export const metadata = {
-  title: "ReWear",
-  description: "Community Clothing Exchange",
-};
+import { Inter } from "next/font/google";
+import { AuthProvider } from "@/context/AuthContext";
+import FloatingNavbar from "@/components/layout/FloatingNavbar"; // <-- Import the new navbar
+const inter = Inter({ subsets: ["latin"] });
 
 export default function RootLayout({
   children,
@@ -14,11 +12,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className={`${inter.className} bg-gray-50`}>
         <AuthProvider>
-          {" "}
-          {/* 2. Wrap your children with it */}
-          {children}
+          <FloatingNavbar />{" "}
+          {/* The new floating sidebar. It needs no wrappers. */}
+          <div>
+            <main>{children}</main>
+          </div>
         </AuthProvider>
       </body>
     </html>
