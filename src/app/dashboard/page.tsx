@@ -100,7 +100,7 @@ export default function DashboardPage() {
 
   if (isAuthLoading || isLoadingData) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[90vh] flex items-center justify-center">
         <Spinner />
       </div>
     );
@@ -110,7 +110,7 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <div className="bg-gray-100 min-h-screen">
+      <div className="bg-gray-100 min-h-[90vh]">
         <div className="container mx-auto p-4 md:p-8">
           {/* Profile Section */}
           <section className="bg-white p-6 rounded-lg shadow-md mb-8">

@@ -12,7 +12,7 @@ const ButtonSpinner = () => (
 );
 
 const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
+  <div className="min-h-[90vh] flex items-center justify-center bg-gray-100">
     <div className="w-16 h-16 border-4 border-blue-500 border-dashed rounded-full animate-spin"></div>
   </div>
 );
@@ -77,7 +77,7 @@ export default function LoginPage() {
   // Otherwise, render the form.
   return (
     <div
-      className="min-h-screen w-full flex items-center justify-center p-4 bg-cover bg-center"
+      className="min-h-[90vh] w-full flex items-center justify-center p-4 bg-cover bg-center"
       style={{
         backgroundImage: "url('/hero-bg.jpg')",
       }}

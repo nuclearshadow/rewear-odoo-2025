@@ -73,7 +73,7 @@ export default function ItemDetailPage({ params }: { params: { id: string } }) {
   // Handle loading and error states first
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-[90vh] flex items-center justify-center">
         <Spinner />
       </div>
     );
@@ -81,7 +81,7 @@ export default function ItemDetailPage({ params }: { params: { id: string } }) {
 
   if (error || !item) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center text-center p-4">
+      <div className="min-h-[90vh] flex flex-col items-center justify-center text-center p-4">
         <h2 className="text-2xl font-bold text-red-600">Error</h2>
         <p className="text-gray-600 mt-2">
           {error || "Could not load the item details."}
